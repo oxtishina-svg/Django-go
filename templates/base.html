@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>
+        {% block title %}
+            Django-go
+        {% endblock %}
+    </title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+</head>
+
+<body>
+<div class="container-fluid">
+    <div class="row min-vh-100">
+
+        <aside class="col-md-2 bg-dark text-white p-3">
+            <h4 class="mb-4">Меню</h4>
+
+            {% include "includes/menu.html" %}
+
+            <footer class="mt-5 pt-5 small text-secondary">
+                <p>Профиль</p>
+                <p>Выход</p>
+            </footer>
+        </aside>
+
+        <main class="col-md-10 p-5">
+            {% block content %}
+            {% endblock %}
+        </main>
+
+    </div>
+</div>
+</body>
+</html>
