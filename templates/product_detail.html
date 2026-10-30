@@ -38,12 +38,30 @@
                     Категория: {{ product.category.name }}
                 </p>
 
-                <a
-                    href="{% url 'catalog:home' %}"
-                    class="btn btn-outline-secondary"
-                >
-                    Назад к товарам
-                </a>
+                <div class="d-flex gap-2 flex-wrap">
+
+                    <a
+                        href="{% url 'catalog:product_update' product.pk %}"
+                        class="btn btn-outline-secondary"
+                    >
+                        Редактировать
+                    </a>
+
+                    <a
+                        href="{% url 'catalog:product_delete' product.pk %}"
+                        class="btn btn-outline-danger"
+                    >
+                        Удалить
+                    </a>
+
+                    <a
+                        href="{% url 'catalog:home' %}"
+                        class="btn btn-outline-primary"
+                    >
+                        Назад к товарам
+                    </a>
+
+                </div>
 
             </div>
         </div>
