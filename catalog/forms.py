@@ -30,6 +30,7 @@ class ProductForm(forms.ModelForm):
             "image",
             "category",
             "price",
+            "is_published",
         )
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
