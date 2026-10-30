@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ product.name }}
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+    <div class="col-md-8">
+
+        <div class="card">
+
+            {% if product.image %}
+                <img
+                    src="{{ product.image.url }}"
+                    class="card-img-top"
+                    alt="{{ product.name }}"
+                >
+            {% endif %}
+
+            <div class="card-body">
+
+                <h1 class="card-title">
+                    {{ product.name }}
+                </h1>
+
+                <p class="card-text">
+                    {{ product.description }}
+                </p>
+
+                <p class="fs-4 fw-bold">
+                    {{ product.price }} ₽
+                </p>
+
+                <p class="text-muted">
+                    Категория: {{ product.category.name }}
+                </p>
+
+                <div class="d-flex gap-2 flex-wrap">
+
+                    <a
+                        href="{% url 'catalog:product_update' product.pk %}"
+                        class="btn btn-outline-secondary"
+                    >
+                        Редактировать
+                    </a>
+
+                    <a
+                        href="{% url 'catalog:product_delete' product.pk %}"
+                        class="btn btn-outline-danger"
+                    >
+                        Удалить
+                    </a>
+
+                    <a
+                        href="{% url 'catalog:home' %}"
+                        class="btn btn-outline-primary"
+                    >
+                        Назад к товарам
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
