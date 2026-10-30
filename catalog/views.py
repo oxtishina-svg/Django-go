@@ -1,5 +1,6 @@
 from typing import cast
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.views.generic import (
     CreateView,
@@ -28,7 +29,7 @@ class ContactsView(TemplateView):
     template_name = "contacts.html"
 
 
-class ProductDetailView(DetailView):
+class ProductDetailView(LoginRequiredMixin, DetailView):
     """Отображает подробную информацию о товаре."""
 
     model = Product
@@ -36,7 +37,7 @@ class ProductDetailView(DetailView):
     context_object_name = "product"
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(LoginRequiredMixin, CreateView):
     """Создаёт новый продукт."""
 
     model = Product
@@ -52,7 +53,7 @@ class ProductCreateView(CreateView):
         )
 
 
-class ProductUpdateView(UpdateView):
+class ProductUpdateView(LoginRequiredMixin, UpdateView):
     """Редактирует существующий продукт."""
 
     model = Product
@@ -68,7 +69,7 @@ class ProductUpdateView(UpdateView):
         )
 
 
-class ProductDeleteView(DeleteView):
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
     """Удаляет продукт."""
 
     model = Product

@@ -1,6 +1,9 @@
+from typing import cast
+
 from django.conf import settings
 from django.contrib.auth import login
 from django.core.mail import send_mail
+from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormView
 
@@ -9,27 +12,20 @@ from users.models import User
 
 
 class RegisterView(FormView):
-    """Регистрация нового пользователя."""
+    """Регистрирует нового пользователя."""
 
     template_name = "registration/register.html"
     form_class = UserRegisterForm
     success_url = reverse_lazy("catalog:home")
 
-    def form_valid(self, form: UserRegisterForm):
-        user = form.save()
+    def form_valid(self, form: UserRegisterForm) -> HttpResponse:
+        user = cast(User, form.save())
 
         login(
             self.request,
             user,
         )
 
-        self.send_welcome_email(user)
-
-        return super().form_valid(form)
-
-    @staticmethod
-    def send_welcome_email(user: User) -> None:
-        """Отправляет приветственное письмо после регистрации."""
         send_mail(
             subject="Добро пожаловать!",
             message="Спасибо за регистрацию в нашем интернет-магазине.",
@@ -37,3 +33,5 @@ class RegisterView(FormView):
             recipient_list=[user.email],
             fail_silently=False,
         )
+
+        return super().form_valid(form)

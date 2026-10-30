@@ -4,7 +4,6 @@ from django.urls import path
 from users.forms import UserLoginForm
 from users.views import RegisterView
 
-
 app_name = "users"
 
 urlpatterns = [
