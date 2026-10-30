@@ -1,31 +1,25 @@
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.views.generic import DetailView, ListView, TemplateView
 
 from catalog.models import Product
 
 
-def home(request: HttpRequest) -> HttpResponse:
+class ProductListView(ListView):
     """Отображает главную страницу со списком товаров."""
-    products = Product.objects.all()
 
-    context = {
-        "products": products,
-    }
-
-    return render(request, "home.html", context)
+    model = Product
+    template_name = "home.html"
+    context_object_name = "products"
 
 
-def contacts(request: HttpRequest) -> HttpResponse:
+class ContactsView(TemplateView):
     """Отображает страницу контактов."""
-    return render(request, "contacts.html")
+
+    template_name = "contacts.html"
 
 
-def product_detail(request: HttpRequest, pk: int) -> HttpResponse:
+class ProductDetailView(DetailView):
     """Отображает подробную информацию о товаре."""
-    product = get_object_or_404(Product, pk=pk)
 
-    context = {
-        "product": product,
-    }
-
-    return render(request, "product_detail.html", context)
+    model = Product
+    template_name = "product_detail.html"
+    context_object_name = "product"
