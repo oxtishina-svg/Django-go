@@ -1,4 +1,4 @@
-from typing import cast
+from typing import Any, cast
 
 from django import forms
 from django.contrib.auth.mixins import (
@@ -6,10 +6,13 @@ from django.contrib.auth.mixins import (
     PermissionRequiredMixin,
     UserPassesTestMixin,
 )
+from django.core.cache import cache
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.cache import cache_page
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -20,7 +23,8 @@ from django.views.generic import (
 )
 
 from catalog.forms import ProductForm
-from catalog.models import Product
+from catalog.models import Category, Product
+from catalog.services import CACHE_TIMEOUT, get_products_by_category
 from users.models import User
 
 
@@ -38,6 +42,10 @@ class ContactsView(TemplateView):
     template_name = "contacts.html"
 
 
+@method_decorator(
+    cache_page(CACHE_TIMEOUT),
+    name="dispatch",
+)
 class ProductDetailView(LoginRequiredMixin, DetailView):
     """Отображает подробную информацию о товаре."""
 
@@ -58,6 +66,10 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         product_form.instance.owner = cast(User, self.request.user)
 
         response = super().form_valid(form)
+
+        product = cast(Product, self.object)
+        cache.delete(f"category_{product.category_id}")
+
         return cast(HttpResponse, response)
 
     def get_success_url(self) -> str:
@@ -85,6 +97,20 @@ class ProductUpdateView(
         product = cast(Product, self.get_object())
 
         return bool(product.owner == self.request.user)
+
+    def form_valid(self, form: forms.ModelForm) -> HttpResponse:
+        old_product = cast(Product, self.get_object())
+        old_category_id = old_product.category_id
+
+        response = super().form_valid(form)
+
+        product = cast(Product, self.object)
+
+        cache.clear()
+        cache.delete(f"category_{old_category_id}")
+        cache.delete(f"category_{product.category_id}")
+
+        return cast(HttpResponse, response)
 
     def get_success_url(self) -> str:
         product = cast(Product, self.object)
@@ -114,6 +140,17 @@ class ProductDeleteView(
 
         return is_owner or is_moderator
 
+    def form_valid(self, form: forms.Form) -> HttpResponse:
+        product = cast(Product, self.object)
+
+        cache.clear()
+        cache.delete(f"category_{product.category_id}")
+
+        return cast(
+            HttpResponse,
+            super().form_valid(form),
+        )
+
     def get_success_url(self) -> str:
         return reverse("catalog:home")
 
@@ -138,7 +175,34 @@ class ProductUnpublishView(
         product.is_published = False
         product.save(update_fields=["is_published"])
 
+        cache.clear()
+        cache.delete(f"category_{product.category_id}")
+
         return redirect(
             "catalog:product_detail",
             pk=product.pk,
         )
+
+
+class CategoryProductListView(TemplateView):
+    """Отображает товары выбранной категории."""
+
+    template_name = "category_products.html"
+
+    def get_context_data(
+        self,
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+
+        category_id = int(self.kwargs["category_id"])
+
+        context["category"] = get_object_or_404(
+            Category,
+            pk=category_id,
+        )
+        context["products"] = get_products_by_category(
+            category_id,
+        )
+
+        return context
